@@ -3,15 +3,23 @@ pipeline {
 stages{
    stage("checkout"){
      steps {
+          sh """
            echo "Checkout done"
+        ls -lrt
+       """"
       }
    }
 
  stage("building the application"){
      steps {
-           echo "building the application"
+          sh """
+  echo "building the application"
+         mvn clean package  
+  echo "builded  the application"
+          """
       }
    }
+
 
 
 } // end of stages
