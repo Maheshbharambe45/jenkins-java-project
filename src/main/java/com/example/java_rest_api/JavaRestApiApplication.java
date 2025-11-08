@@ -8,6 +8,7 @@ public class JavaRestApiApplication {
 
 	public static void main(String[] args) {
 		System.out.println("Hello from Java springboottttttttttttttt");
+		System.out.println("Running test case 2");
 		SpringApplication.run(JavaRestApiApplication.class, args);
 	}
 
