@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+environment {
+        IMAGE_NAME = 'priya123456/restapi'
+        CONTAINER_NAME = 'restapi-container'
+        PORT_MAPPING = '8081:7000'  // hostPort:containerPort
+    }
+
     stages {
         stage("checkout") {
             steps {
@@ -36,6 +42,7 @@ pipeline {
             steps {
                 sh """
                 echo "========building the image  Application============"
+                docker build -t $IMAGE_NAME .
                 echo "======builded  the image Java Application completed====="
                 """
             }
