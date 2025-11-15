@@ -63,10 +63,10 @@ stage("Building the application"){
 
 stage('Deploy on Remote Minikube') {
     steps {
-        sshagent(['jenkins-ssh-key-id']) {
-            sh 'scp deployment.yml ubuntu@$MINIKUBE_IP:/home/ubuntu/'
-            sh 'ssh ubuntu@$MINIKUBE_IP "kubectl delete -f /home/ubuntu/deployment.yml --ignore-not-found=true"'
-            sh 'ssh ubuntu@$MINIKUBE_IP "kubectl apply -f /home/ubuntu/deployment.yml"'
+        sshagent(['jenkins-ec2-key-id']) {
+            sh 'scp -o StrictHostKeyChecking=no deployment.yml ubuntu@$MINIKUBE_IP:/home/ubuntu/'
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@$MINIKUBE_IP "kubectl delete -f /home/ubuntu/deployment.yml --ignore-not-found=true"'
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@$MINIKUBE_IP "kubectl apply -f /home/ubuntu/deployment.yml"'
         }
     }
 }
