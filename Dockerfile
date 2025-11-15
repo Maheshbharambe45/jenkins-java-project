@@ -1,4 +1,4 @@
-FROM openjdk:26-ea-trixie
+FROM eclipse-temurin:17-jre-jammy
 
 COPY target/java-rest-api-0.0.1-SNAPSHOT.jar app.jar
 
