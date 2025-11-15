@@ -1,54 +1,72 @@
 pipeline {
     agent any
 
-environment {
+    environment {
         IMAGE_NAME = 'priya123456/restapi'
         CONTAINER_NAME = 'restapi-container'
         PORT_MAPPING = '8081:7000'  // hostPort:containerPort
     }
 
     stages {
-        stage("checkout") {
+        stage("Checkout") {
             steps {
-                sh """
-                echo "Checkout done - \$PWD"
-                ls -l
-                """
+                echo "Checking out the code..."
+                // Pull from your Git repository
+                checkout scm
+                sh "ls -l"
             }
         }
 
-        stage("Building the application") {
+        stage("Build Java Application") {
             steps {
-                sh """
-                echo "========Building Java Application============"
-                mvn clean package
-                echo "======Building Java Application completed====="
-                """
+                echo "======== Building Java Application ============"
+                sh "mvn clean package -DskipTests"
+                echo "====== Build completed ======"
             }
         }
 
-        stage("testing the application") {
+        stage("Test Java Application") {
             steps {
-                sh """
-                echo "========testing Java Application============"
-                mvn test
-                echo "======testing Java Application completed====="
-                """
+                echo "======== Running Tests ============"
+                sh "mvn test"
+                echo "====== Tests completed ======"
             }
         }
 
-
-        stage("building the docker image for the application") {
+        stage("Docker Build") {
             steps {
-                sh """
-                echo "========building the image  Application============"
-                docker build -t $IMAGE_NAME .
-                echo "======builded  the image Java Application completed====="
-                """
+                echo "======== Building Docker Image ============"
+                // Pull base image first for caching (optional, speeds up build)
+                sh "docker pull eclipse-temurin:17-jre-jammy || true"
+                // Build the Docker image
+                sh "docker build -t $IMAGE_NAME ."
+                echo "====== Docker Image Built ======"
             }
         }
 
+        stage("Run Docker Container (Optional)") {
+            steps {
+                echo "======== Running Docker Container ============"
+                // Stop existing container if running
+                sh """
+                docker rm -f $CONTAINER_NAME || true
+                docker run -d --name $CONTAINER_NAME -p $PORT_MAPPING $IMAGE_NAME
+                """
+                echo "====== Docker Container Started ======"
+            }
+        }
+    }
 
-
+    post {
+        always {
+            echo "Cleaning workspace..."
+            cleanWs()
+        }
+        success {
+            echo "Pipeline completed successfully!"
+        }
+        failure {
+            echo "Pipeline failed. Check logs for details."
+        }
     }
 }
