@@ -5,6 +5,7 @@ environment {
         IMAGE_NAME = 'maheshbharambe45/restapi'
         CONTAINER_NAME = 'restapi-container'
         PORT_MAPPING = '8081:7000'  // hostPort:containerPort
+        MINIKUBE_IP = '43.204.138.3' //ec2 ip address
     }
 
 stages{
@@ -59,6 +60,14 @@ stage("Building the application"){
               }
         }
      }
+
+stage('Deploy on Remote Minikube') {
+            steps {
+                    sh 'scp deployment.yml ubuntu@$MINIKUBE_IP:/home/ubuntu/'
+                    sh 'ssh ubuntu@$MINIKUBE_IP "kubectl delete -f /home/ubuntu/deployment.yml --ignore-not-found=true"'
+                    sh 'ssh ubuntu@$MINIKUBE_IP "kubectl apply -f /home/ubuntu/deployment.yml"'
+                }
+            }
 
 } // end of stages
 
