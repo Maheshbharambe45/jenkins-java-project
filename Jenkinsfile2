@@ -62,12 +62,15 @@ stage("Building the application"){
      }
 
 stage('Deploy on Remote Minikube') {
-            steps {
-                    sh 'scp deployment.yml ubuntu@$MINIKUBE_IP:/home/ubuntu/'
-                    sh 'ssh ubuntu@$MINIKUBE_IP "kubectl delete -f /home/ubuntu/deployment.yml --ignore-not-found=true"'
-                    sh 'ssh ubuntu@$MINIKUBE_IP "kubectl apply -f /home/ubuntu/deployment.yml"'
-                }
-            }
+    steps {
+        sshagent(['jenkins-ssh-key-id']) {
+            sh 'scp deployment.yml ubuntu@$MINIKUBE_IP:/home/ubuntu/'
+            sh 'ssh ubuntu@$MINIKUBE_IP "kubectl delete -f /home/ubuntu/deployment.yml --ignore-not-found=true"'
+            sh 'ssh ubuntu@$MINIKUBE_IP "kubectl apply -f /home/ubuntu/deployment.yml"'
+        }
+    }
+}
+
 
 } // end of stages
 
