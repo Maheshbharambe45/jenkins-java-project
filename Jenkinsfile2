@@ -5,7 +5,7 @@ pipeline {
         IMAGE_NAME = 'maheshbharambe45/restapi'
         CONTAINER_NAME = 'restapi-container'
         PORT_MAPPING = '8081:7000'
-        MINIKUBE_IP = '52.66.226.11'  
+        MINIKUBE_IP = '13.200.233.19'  
     }
 
     stages {
