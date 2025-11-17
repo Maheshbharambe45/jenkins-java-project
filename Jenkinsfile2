@@ -5,7 +5,7 @@ environment {
         IMAGE_NAME = 'maheshbharambe45/restapi'
         CONTAINER_NAME = 'restapi-container'
         PORT_MAPPING = '8081:7000'  // hostPort:containerPort
-        MINIKUBE_IP = '43.204.138.3' //ec2 ip address
+        MINIKUBE_IP = '192.168.49.2' //ec2 ip address
     }
 
 stages{
@@ -61,15 +61,29 @@ stage("Building the application"){
         }
      }
 
-stage('Deploy on Remote Minikube') {
+stage('Connect to EC2 & Deploy on Minikube') {
     steps {
-        sshagent(['jenkins-ec2-key-id']) {
-            sh 'scp -o StrictHostKeyChecking=no deployment.yml ubuntu@$MINIKUBE_IP:/home/ubuntu/'
-            sh 'ssh -o StrictHostKeyChecking=no ubuntu@$MINIKUBE_IP "kubectl delete -f /home/ubuntu/deployment.yml --ignore-not-found=true"'
-            sh 'ssh -o StrictHostKeyChecking=no ubuntu@$MINIKUBE_IP "kubectl apply -f /home/ubuntu/deployment.yml"'
+        withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+            
+            sh """
+                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ubuntu@${MINIKUBE_IP} 'echo Connected to EC2'
+            """
+
+            sh """
+                scp -i ${SSH_KEY} -o StrictHostKeyChecking=no deployment.yaml ubuntu@${MINIKUBE_IP}:/home/ubuntu/
+            """
+
+            sh """
+                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ubuntu@${MINIKUBE_IP} "kubectl delete -f /home/ubuntu/deployment.yaml --ignore-not-found=true"
+            """
+
+            sh """
+                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ubuntu@${MINIKUBE_IP} "kubectl apply -f /home/ubuntu/deployment.yaml"
+            """
         }
     }
 }
+
 
 
 } // end of stages
