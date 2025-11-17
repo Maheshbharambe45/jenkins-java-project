@@ -5,7 +5,7 @@ pipeline {
         IMAGE_NAME = 'maheshbharambe45/restapi'
         CONTAINER_NAME = 'restapi-container'
         PORT_MAPPING = '8081:7000'
-        MINIKUBE_IP = '52.66.226.11'   
+        MINIKUBE_IP = '52.66.226.11'  
     }
 
     stages {
@@ -76,24 +76,24 @@ pipeline {
                 ]) {
 
                     // Connect to EC2
-                    sh '''
-                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@"$MINIKUBE_IP" "echo Connected to EC2"
-                    '''
+                    sh """
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@${MINIKUBE_IP} "echo Connected to EC2"
+                    """
 
                     // Copy deployment.yaml
-                    sh '''
-                        scp -i "$SSH_KEY" -o StrictHostKeyChecking=no deployment.yaml ubuntu@"$MINIKUBE_IP":/home/ubuntu/
-                    '''
+                    sh """
+                        scp -i "$SSH_KEY" -o StrictHostKeyChecking=no deployment.yaml ubuntu@${MINIKUBE_IP}:/home/ubuntu/
+                    """
 
-                    // Delete existing Kubernetes deployment
-                    sh '''
-                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@"$MINIKUBE_IP" "kubectl delete -f /home/ubuntu/deployment.yaml --ignore-not-found=true"
-                    '''
+                    // Delete old deployment
+                    sh """
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@${MINIKUBE_IP} "kubectl delete -f /home/ubuntu/deployment.yaml --ignore-not-found=true"
+                    """
 
                     // Apply new deployment
-                    sh '''
-                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@"$MINIKUBE_IP" "kubectl apply -f /home/ubuntu/deployment.yaml"
-                    '''
+                    sh """
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@${MINIKUBE_IP} "kubectl apply -f /home/ubuntu/deployment.yaml"
+                    """
                 }
             }
         }
