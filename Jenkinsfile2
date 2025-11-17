@@ -5,12 +5,12 @@ pipeline {
         IMAGE_NAME = 'maheshbharambe45/restapi'
         CONTAINER_NAME = 'restapi-container'
         PORT_MAPPING = '8081:7000'
-        MINIKUBE_IP = '13.200.233.19'  
+        MINIKUBE_IP = '13.200.233.19'
     }
 
     stages {
 
-        stage("checkout") {
+        stage("Checkout") {
             steps {
                 sh '''
                     echo "Checkout done - $PWD"
@@ -66,7 +66,7 @@ pipeline {
             }
         }
 
-        stage('Connect to EC2 & Deploy on Minikube') {
+        stage("Connect to EC2 & Deploy on Minikube") {
             steps {
                 withCredentials([
                     sshUserPrivateKey(
@@ -75,24 +75,27 @@ pipeline {
                     )
                 ]) {
 
+                    // Debug: Check deployment.yml exists in Jenkins workspace
+                    sh "ls -l"
+
                     // Connect to EC2
                     sh """
                         ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@${MINIKUBE_IP} "echo Connected to EC2"
                     """
 
-                    // Copy deployment.yaml
+                    // Upload deployment.yml
                     sh """
-                        scp -i "$SSH_KEY" -o StrictHostKeyChecking=no deployment.yaml ubuntu@${MINIKUBE_IP}:/home/ubuntu/
+                        scp -i "$SSH_KEY" -o StrictHostKeyChecking=no deployment.yml ubuntu@${MINIKUBE_IP}:/home/ubuntu/
                     """
 
                     // Delete old deployment
                     sh """
-                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@${MINIKUBE_IP} "kubectl delete -f /home/ubuntu/deployment.yaml --ignore-not-found=true"
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@${MINIKUBE_IP} "kubectl delete -f /home/ubuntu/deployment.yml --ignore-not-found=true"
                     """
 
                     // Apply new deployment
                     sh """
-                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@${MINIKUBE_IP} "kubectl apply -f /home/ubuntu/deployment.yaml"
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@${MINIKUBE_IP} "kubectl apply -f /home/ubuntu/deployment.yml"
                     """
                 }
             }
